@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title> snake </title>
+</head>
+<style>
+	body{
+		background: #18A15F;
+	}
+	.boxMap{
+		width: 600px;
+		height: 600px;
+		background: black;
+		border: 1px solid black;
+		position: absolute;
+		top: 0;left: 0;right: 0;bottom: 0;
+		margin: auto;
+	}
+	.block{
+		width: 29px;height: 29px;
+		background: #A6E22E;
+		margin-right: 1px;
+		margin-bottom: 1px;
+		float: left;
+	}
+
+	.she{
+		background: #777;
+	}
+	.shetou{
+		background: #000;
+	}
+	.shewei{
+		background: #eee;
+	}
+	.shiwu{
+		background: red;
+	}
+
+	.start_zhezhao{
+		width: 100%;height: 100%;
+		background: rgba(0,0,0,0.7);
+		position: absolute;
+		top:0;left: 0;right: 0;bottom: 0;
+		margin: auto;
+	}
+	.start{
+		width: 300px;
+		height: 200px;
+		background: black;
+		position: absolute;
+		top: 0;left: 0;right: 0;bottom: 0;
+		margin: auto;
+
+		color: #fff;
+		font-size: 36px;
+		font-weight: bold;
+		text-align: center;
+		line-height: 200px;
+
+		cursor: pointer;
+	}
+</style>
+<body>
+	<div class="boxMap"></div>
+	<div class="start_zhezhao">
+		<div class="start">
+			start game
+		</div>
+	</div>
+</body>
+</html>
+<script>
+	var boxMap = document.querySelector(".boxMap");
+	var start_zhezhao = document.querySelector(".start_zhezhao");
+	var start = document.querySelector(".start");
+	var she = [{x:0,y:0},
+			   	{x:0,y:1},
+			   	{x:0,y:2}]
+	var shiwu = {};
+	var t;
+	var fangxiang = "right";
+	
+	function createMap () {
+		for(var i=0; i<20; i++){
+			for(var j=0; j<20; j++){
+				var map = document.createElement("div");
+				map.classList.add("block");
+				boxMap.appendChild(map);
+				map.id = i+"-"+j
+			}
+		}
+	}
+	function drawShe(){
+		for (var i = 0; i < she.length; i++) {
+			document.getElementById(she[i].x + "-" + she[i].y).classList.add("she");
+		}
+		document.getElementById(she[2].x + "-" + she[2].y).classList.add("shetou");
+		document.getElementById(she[0].x + "-" + she[0].y).classList.add("shewei");
+	}
+	function fangfood(){
+		do{
+			var fx = Math.floor(Math.random()*20);
+			var fy = Math.floor(Math.random()*20);
+		}while(check(fx,fy))
+
+		document.getElementById(fx+"-"+fy).classList.add("shiwu");
+
+		shiwu.x = fx;
+		shiwu.y = fy;
+	}
+	function check(x,y){
+		for(var i = 0; i<she.length; i++){
+			if (she[i].x == x && she[i].y == y) {
+				return true;
+			}
+		}
+		return false;
+	}
+	createMap();
+	drawShe();
+	fangfood();
+	function move(){
+		var jiutou = she[she.length-1];
+
+		if (fangxiang == "right") {
+			var xintou = {x: jiutou.x, y: jiutou.y+1};
+		}
+		if (fangxiang == "left") {
+			var xintou = {x: jiutou.x, y: jiutou.y-1};
+		}
+		if (fangxiang == "top") {
+			var xintou = {x: jiutou.x-1, y: jiutou.y};
+		}
+		if (fangxiang == "bottom") {
+			var xintou = {x: jiutou.x+1, y: jiutou.y};
+		}
+		if (xintou.x == -1 || xintou.x == 20 || xintou.y == -1 || xintou.y == 20) {
+			clearInterval(t);
+			alert("game over!!!");
+			location.reload();
+		}
+		for(var i = 0; i < she.length; i++){
+			if (she[i].x == xintou.x && she[i].y == xintou.y) {
+				clearInterval(t);
+				alert("game over!!!");
+				location.reload();
+			}
+		}
+		document.getElementById(xintou.x+"-"+xintou.y).classList.add("she");
+		document.getElementById(xintou.x+"-"+xintou.y).classList.add("shetou");
+		she.push(xintou);
+		document.getElementById(jiutou.x+"-"+jiutou.y).classList.remove("shetou");
+		if (xintou.x == shiwu.x&& xintou.y == shiwu.y){
+			document.getElementById(shiwu.x+"-"+shiwu.y).classList.remove("shiwu");
+			fangfood();
+		}else{
+			var jiuwei = she[0];
+			document.getElementById(jiuwei.x+"-"+jiuwei.y).classList.remove("shewei");
+			document.getElementById(jiuwei.x+"-"+jiuwei.y).classList.remove("she");
+			she.shift();
+			document.getElementById(she[0].x+"-"+she[0].y).classList.add("shewei");
+		}
+	}
+	function keydownHandle(e){
+		if (e.keyCode == 37) {
+			if (fangxiang != "right") {
+				fangxiang = "left";
+			}
+		}
+		if (e.keyCode == 38) {
+			if (fangxiang != "bottom") {
+				fangxiang = "top";
+			}
+		}
+		if (e.keyCode == 39) {
+			if (fangxiang != "left") {
+				fangxiang = "right";
+			}
+		}
+		if (e.keyCode == 40) {
+			if (fangxiang != "top") {
+				fangxiang = "bottom";
+			}	
+		}
+	}
+	start.onclick = function(){
+		start_zhezhao.style.display = "none";
+		t = setInterval(move, 300);
+		document.onkeydown = keydownHandle;
+	}
+</script>
